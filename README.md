@@ -1,232 +1,179 @@
-# ♻️ WasteWise - AI Waste Sorting App with FiftyOne Analytics
+# ♻️ WasteWise
+### AI-Powered Waste Disposal Intelligence — Built with Claude Sonnet + FiftyOne
 
-**Upload a waste photo → Get instant AI recommendations → Earn points & badges → See city insights**
+> *Every year, $1.5 billion worth of recyclables go to landfill — not because people don't care, but because the rules are confusing and change by ZIP code. WasteWise fixes that.*
 
-Smart waste disposal with leaderboards, environmental impact tracking, and FiftyOne-powered analytics. Works on phones! 📱
+Built at the **Agents World: Visual AI Hackathon @ ASU** (March 2026) — Voxel51 × Anthropic
+
+---
+
+## 🌍 The Problem
+
+- **25%** of recyclables are contaminated at source — one greasy pizza box ruins an entire batch
+- **62%** of Americans are confused about what goes where
+- Disposal rules vary by city, neighborhood, and hauler — Google gives generic answers
+- Nobody has built a reasoning layer on top of that complexity — until now
+
+---
+
+## 💡 What WasteWise Does
+
+Snap a photo of any item → Claude Sonnet 4.6 **reasons** about it (not just classifies) → get hyperlocal disposal guidance for your exact city, instantly.
+
+Unlike lookup tables, Claude handles edge cases:
+- *"Is this pizza box recyclable?"* — depends if it's greasy
+- *"What about this plastic bag?"* — store drop-off, NOT curbside
+- *"Old smartphone?"* — special e-waste, here are the 3 nearest drop-off locations
+
+**FiftyOne** powers the data layer — every classification is stored as a labeled sample, letting us visualize where the AI succeeds, find failure modes, and build a ground-truth dataset that improves over time.
+
+---
 
 ## ✨ Features
 
-- 🤖 **AI Classification** - Claude Sonnet 4.6 analyzes your waste in seconds
-- 📊 **Leaderboard** - Compete with friends, see who's sorted most
-- 🏆 **Badges** - Unlock achievements as you sort more items
-- 🌍 **Impact Tracking** - Watch your CO₂ avoided, water saved, trees saved
-- � **City Insights** - See waste trends & statistics for your community
-- 🔬 **FiftyOne Analytics** - (Admin) Full dataset visualization & analysis
-- ✅ **Quality Control** - (Admin) Review & verify classifications
-- �📱 **Mobile Friendly** - Works perfectly on phones
-- 🚀 **Deploy Anywhere** - Free hosting on Streamlit Cloud
+| Feature | Description |
+|---------|-------------|
+| 📸 **Live Camera + Upload** | Snap a photo on your phone or upload from gallery |
+| 🤖 **Claude Sonnet 4.6 Vision** | Reasoning-based classification, not just pattern matching |
+| 📍 **Hyperlocal Rules** | City-specific disposal logic (Phoenix ≠ Seattle ≠ NYC) |
+| 🗺️ **Drop-off Map** | Nearest special disposal locations for hazardous items |
+| 🔬 **FiftyOne Analytics** | Real-time AI performance tracking across all users |
+| 🌍 **Impact Tracking** | CO₂ avoided, water saved, trees saved per item |
+| 🏆 **Leaderboard + Badges** | Community competition to drive behavior change |
+| 📊 **Research Dashboard** | City-wide waste trends and classification data export |
 
-## 🏆 Badges You Can Unlock
+---
 
-- 🎖️ First Step → Sort 1 item
-- 🎖️ Quick Starter → Sort 10 items
-- 🎖️ Eco Warrior → Sort 50 items
-- 🎖️ Legendary Sorter → Sort 100 items
-- 🔥 7-Day Streak → Sort 7 consecutive days
-- 🔥 30-Day Legend → Sort 30 consecutive days
+## 🚀 Quick Start
 
-## 📊 Admin Features (Password Protected)
-
-### 📈 Analytics Dashboard
-- View all submissions across all users
-- See waste distribution by city
-- Track AI confidence scores
-- Identify most common waste items
-- Monitor verification rates
-- **Access:** Check "🔐 Admin Mode" box, password: `admin123`
-
-### ✅ Quality Control
-- Review unverified submissions
-- Mark classifications as correct/incorrect
-- Track verification progress
-- Improve AI accuracy from real user data
-- **Access:** Same admin password
-
-### 📊 City Insights (Public for All Users)
-- See city-wide waste trends
-- Top waste items by community
-- Recycling vs compost percentage
-- Average AI confidence
-- Educational insights
-
-## 🚀 Quick Start (2 minutes)
-
-### 1️⃣ Install
+### 1. Install
 ```bash
 pip install -r requirements_streamlit.txt
 ```
 
-### 2️⃣ Configure
+### 2. Configure
 ```bash
 cp .env.example .env
+# Add your Anthropic API key from https://console.anthropic.com
 ```
-Open `.env` and add your Anthropic API key from https://console.anthropic.com
 
-### 3️⃣ Run
+### 3. Run
 ```bash
 streamlit run wastewise_streamlit.py
 ```
-
-**Opens at:** `http://localhost:8501`
-
-## 📱 Access on Your Phone
-
-You can access the app on your phone in **3 ways**:
-
-### Option 1: Same WiFi Network (Easiest for Demo!)
-```bash
-streamlit run wastewise_streamlit.py --server.address 0.0.0.0
-```
-Then on your phone, open: `http://YOUR-COMPUTER-IP:8501`
-
-To find your computer IP:
-- Windows: Run `ipconfig` in terminal, look for "IPv4 Address"
-- Mac/Linux: Run `ifconfig`, look for inet address
-
-### Option 2: Local Network with ngrok (Quick Share)
-```bash
-pip install ngrok
-streamlit run wastewise_streamlit.py &
-ngrok http 8501
-```
-Share the ngrok URL with friends - works anywhere!
-
-### Option 3: Deploy to Streamlit Cloud (Permanent)
-```bash
-git add .
-git commit -m "WasteWise demo"
-git push origin main
-```
-
-Then:
-1. Go to https://share.streamlit.io/
-2. Sign in with GitHub
-3. Click "New app"
-4. Select repo + main file: `wastewise_streamlit.py`
-5. Deploy → Add API key to Secrets
-6. Your app is live! Share the link with anyone
-
-**Everyone can access on their phones via the link!**
-
-## 🎮 How to Use
-
-1. **Create Account** → Pick username, choose city
-2. **Upload Photo** → Take photo with phone or upload from gallery
-3. **See Classification** → AI shows: item name, bin type, confidence
-4. **Earn Points** → Save to leaderboard, gain points
-5. **Check Leaderboard** → See rankings, compete with friends
-6. **Unlock Badges** → Get achievements for streaks & milestones
-7. **Track Impact** → Watch your environmental stats grow
-
-## 🏆 Badges You Can Unlock
-
-- 🎖️ First Step → Sort 1 item
-- 🎖️ Quick Starter → Sort 10 items
-- 🎖️ Eco Warrior → Sort 50 items
-- 🎖️ Legendary Sorter → Sort 100 items
-- 🔥 7-Day Streak → Sort 7 consecutive days
-- 🔥 30-Day Legend → Sort 30 consecutive days
-
-## 📊 Points System
-
-Each item earns points based on bin type × confidence:
-- ♻️ Recycling: 100 pts
-- 🌱 Compost: 120 pts
-- ⚠️ Special (hazmat): 150 pts
-- 🗑️ Landfill: 25 pts
-
-## 🔧 Customization
-
-### Change Cities
-Edit line ~300 in `wastewise_streamlit.py`:
-```python
-city = st.selectbox("City", ["Tempe", "Phoenix", "Denver", "NYC"])
-```
-
-### Adjust Points
-Edit `calculate_points()` function:
-```python
-base_points = {
-    "recycling": 100,      # Change these numbers
-    "compost": 120,
-}
-```
-
-### Add More Badges
-Edit `check_badges()` function with new badge conditions.
-
-## � FiftyOne Integration
-
-The app automatically collects all user submissions into a FiftyOne dataset for analytics:
-
-### What Gets Tracked
-- User submissions (photos, timestamps, usernames)
-- AI classifications (item name, bin type, confidence)
-- City location
-- Verification status (admin quality control)
-
-### Admin Analytics Features
-1. **Dashboard** - See submissions by city, bin type distribution, confidence scores
-2. **Verification** - Mark correct/incorrect classifications to improve AI
-3. **Insights** - Generate city trends, common waste items, recycling rates
-
-### How to Access
-1. Login to app
-2. Check "🔐 Admin Mode" in sidebar
-3. Password: `admin123`
-
-### Data Usage
-- Understand waste patterns in your community
-- Improve AI accuracy from real corrections
-- Create reports on waste trends
-- Generate insights for education
-
-## �🐛 Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| "API key not found" | Open `.env`, add your key from console.anthropic.com |
-| "ModuleNotFoundError" | Run `pip install -r requirements_streamlit.txt` |
-| "Can't access on phone" | Make sure phone is on same WiFi, use computer IP |
-| "Port 8501 in use" | Run `streamlit run wastewise_streamlit.py --server.port 8502` |
-
-## 📁 What's What
-
-```
-wastewise_streamlit.py         ← The entire app (single file)
-requirements_streamlit.txt     ← Packages to install
-wastewise_data.json            ← Your user data (auto-created)
-.env                           ← Your API key (you create this)
-.env.example                   ← Template (copy to .env)
-```
-
-## 💡 Tips for Demo
-
-**Show it on your phone:**
-```bash
-streamlit run wastewise_streamlit.py --server.address 0.0.0.0
-```
-- Open on your phone: `http://[YOUR-IP]:8501`
-- Create a test account
-- Upload a waste photo
-- Show the leaderboard
-- Explain the badges & impact tracking
-
-**Best demo items:** plastic bottle, pizza box, hazardous item, compost
-
-## 🎯 Next Steps
-
-1. **Local Demo** → Run above, open on phone via WiFi
-2. **Quick Share** → Deploy free via Streamlit Cloud (git push)
-3. **Customize** → Edit cities, points, badges
-4. **Invite Friends** → Share the Streamlit Cloud link
-
-## 📞 API Cost
-
-- Per image: ~$0.003 (very cheap!)
-- 1 user, 20 images/month: ~$0.06
-- Get free tier at https://console.anthropic.com
+Opens at `http://localhost:8501`
 
 ---
 
-**Ready? Run:** `streamlit run wastewise_streamlit.py` ♻️
+## 📱 Run on Your Phone (Best for Demo)
+
+```bash
+streamlit run wastewise_streamlit.py --server.address 0.0.0.0
+```
+
+Find your computer's IP (`ipconfig` on Windows, `ifconfig` on Mac/Linux) then open `http://YOUR-IP:8501` on your phone. Camera works natively.
+
+---
+
+## ☁️ Deploy to Streamlit Cloud (Free, Permanent URL)
+
+```bash
+git add .
+git commit -m "deploy"
+git push origin main
+```
+
+1. Go to [share.streamlit.io](https://share.streamlit.io)
+2. Connect your GitHub repo
+3. Main file: `wastewise_streamlit.py`
+4. Add `ANTHROPIC_API_KEY` to Secrets
+5. Share the live URL with anyone, anywhere
+
+---
+
+## 🔬 FiftyOne Integration
+
+Every classification is logged to a FiftyOne dataset with:
+- Image sample + filepath
+- Predicted bin type (recycling / compost / landfill / special)
+- Claude's confidence score
+- City, username, timestamp
+- Human verification status (admin QC)
+
+This creates a **continuously improving ground-truth dataset** — the foundation for training a specialized waste classification model.
+
+**Admin access:** Check `🔐 Admin Mode` in sidebar → password `admin123`
+
+---
+
+## 🏆 Gamification
+
+| Bin Type | Points |
+|----------|--------|
+| ♻️ Recycling | 100 × confidence |
+| 🌱 Compost | 120 × confidence |
+| ⚠️ Special/Hazmat | 150 × confidence |
+| 🗑️ Landfill | 25 × confidence |
+
+**Badges:** First Step → Quick Starter → Eco Warrior → Legendary Sorter → 7-Day Streak → 30-Day Legend
+
+---
+
+## 🗺️ Real-World Impact
+
+A 30% reduction in contamination saves a mid-size city like Phoenix **$500K+/year** in landfill diversion fees. WasteWise attacks the root cause — behavior at the point of disposal — with AI reasoning that actually explains *why*, so users learn over time.
+
+---
+
+## 🛣️ Roadmap
+
+- [ ] **Google Places API** — real drop-off locations for any address worldwide
+- [ ] **50 US cities** — expand beyond Phoenix metro
+- [ ] **Municipal API integrations** — live rule updates from city databases
+- [ ] **Bilingual support** — Spanish-first for broader community reach
+- [ ] **City government dashboard** — sell insights to sustainability offices
+- [ ] **FiftyOne plugin** — open-source waste classification operator
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| AI Vision + Reasoning | Claude Sonnet 4.6 (Anthropic) |
+| Dataset Management | FiftyOne (Voxel51) |
+| Frontend | Streamlit |
+| Data Storage | JSON → upgradeable to PostgreSQL |
+| Deployment | Streamlit Cloud |
+
+---
+
+## 📁 Project Structure
+
+```
+wastewise_streamlit.py    ← Entire app (single file)
+requirements_streamlit.txt
+wastewise_data.json       ← Auto-created on first run
+.env                      ← Your API key (create from .env.example)
+.env.example
+```
+
+---
+
+## 💰 API Cost
+
+- Per image analysis: ~$0.003
+- 100 users × 20 images/month: ~$6.00
+- Free tier at [console.anthropic.com](https://console.anthropic.com) covers development
+
+---
+
+## 👤 Built By
+
+**Ray** — ASU Student  
+Built solo in 24 hours at Agents World: Visual AI Hackathon @ ASU  
+*Wildcard Track — Sustainability*
+
+---
+
+*"Every correctly sorted item is a small act of impact."*
