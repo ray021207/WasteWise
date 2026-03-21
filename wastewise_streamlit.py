@@ -242,77 +242,74 @@ def save_data(data):
 # AUTO-SAVE HELPER
 # ============================================
 
-def auto_save_submission(result, image_base64=None):
-    """Save classification result and log to FiftyOne dataset"""
+def auto_save_submission(result):
+    """Save classification result immediately — no button needed"""
     data = load_data()
     user = data["users"][st.session_state.username]
 
-    user["totalPoints"]         += result["points"]
-    user["totalItemsSorted"]    += 1
-    user["stats"]["co2Saved"]   += result["environmentalImpact"]["co2"]
+    user["totalPoints"] += result["points"]
+    user["totalItemsSorted"] += 1
+    user["stats"]["co2Saved"] += result["environmentalImpact"]["co2"]
     user["stats"]["waterSaved"] += result["environmentalImpact"]["water"]
     user["stats"]["treesSaved"] += result["environmentalImpact"]["trees"]
 
+    submission = {
+        "timestamp": datetime.now().isoformat(),
+        "item": result["item"],
+        "bin": result["bin"],
+        "confidence": result["confidence"],
+        "verified": False
+    }
     if "submissions" not in user:
         user["submissions"] = []
-    user["submissions"].append({
-        "timestamp": datetime.now().isoformat(),
-        "item":      result["item"],
-        "bin":       result["bin"],
-        "confidence": result["confidence"],
-        "verified":  False
-    })
+    user["submissions"].append(submission)
 
     for entry in data["leaderboard"]:
         if entry["username"] == st.session_state.username:
-            entry["totalPoints"]      = user["totalPoints"]
+            entry["totalPoints"] = user["totalPoints"]
             entry["totalItemsSorted"] = user["totalItemsSorted"]
-            entry["badges"]           = user["badges"]
+            entry["badges"] = user["badges"]
             break
 
     save_data(data)
     update_streak(st.session_state.username)
     check_badges(st.session_state.username)
 
-    # ── LOG TO FIFTYONE ──
-    if image_base64:
-        try:
-            import fiftyone as fo
+# ============================================
+# AUTHENTICATION
+# ============================================
 
-            dataset_name = "WasteWise_Submissions"
-            if dataset_name in fo.list_datasets():
-                dataset = fo.load_dataset(dataset_name)
-            else:
-                dataset = fo.Dataset(dataset_name, persistent=True)
+def init_user_session():
+    if "username" not in st.session_state:
+        st.session_state.username = None
+    if "user_city" not in st.session_state:
+        st.session_state.user_city = None
+    if "last_saved_item" not in st.session_state:
+        st.session_state.last_saved_item = None
 
-            # Save image to disk
-            image_bytes = base64.b64decode(image_base64)
-            save_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fiftyone_images")
-            os.makedirs(save_dir, exist_ok=True)
-            image_path = os.path.join(save_dir,
-                f"{st.session_state.username}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg")
+def register_user(username, city):
+    data = load_data()
+    if username in data["users"]:
+        return False, "Username already exists"
+    data["users"][username] = {
+        "city": city, "totalPoints": 0, "totalItemsSorted": 0,
+        "currentStreak": 0, "longestStreak": 0,
+        "joinedAt": datetime.now().isoformat(),
+        "stats": {"co2Saved": 0.0, "waterSaved": 0.0, "treesSaved": 0.0},
+        "badges": [], "lastActivityDate": None, "submissions": []
+    }
+    data["leaderboard"].append({
+        "username": username, "city": city,
+        "totalPoints": 0, "totalItemsSorted": 0, "badges": []
+    })
+    save_data(data)
+    return True, "Registration successful!"
 
-            with open(image_path, "wb") as f:
-                f.write(image_bytes)
-
-            # Add to FiftyOne
-            sample = fo.Sample(filepath=image_path)
-            sample["waste_item"]  = result["item"]
-            sample["bin_type"]    = result["bin"]
-            sample["confidence"]  = result["confidence"]
-            sample["city"]        = st.session_state.user_city
-            sample["username"]    = st.session_state.username
-            sample["timestamp"]   = datetime.now().isoformat()
-            sample["verified"]    = False
-            sample["points"]      = result["points"]
-
-            dataset.add_sample(sample)
-            dataset.save()
-            print(f"FiftyOne logged: {result['item']} → {result['bin']}")
-
-        except Exception as e:
-            print(f"FiftyOne log error: {e}")
-
+def login_user(username):
+    data = load_data()
+    if username not in data["users"]:
+        return False, "Username not found"
+    return True, data["users"][username]
 
 # ============================================
 # WASTE CLASSIFICATION
@@ -601,7 +598,7 @@ def page_sort():
                     item_key = result["item"] + result.get("bin", "")
                     if st.session_state.last_saved_item != item_key:
                         st.session_state.last_saved_item = item_key
-                        auto_save_submission(result, base64_image)
+                        auto_save_submission(result)
                         st.success(f"✅ Auto-saved! +{result['points']} points earned!")
                         st.balloons()
 
