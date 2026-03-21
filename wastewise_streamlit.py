@@ -661,7 +661,7 @@ def page_sort():
                             <p style="color:#444;margin:0;font-size:0.95em;">{result['impact']}</p>
                         </div>
                         """, unsafe_allow_html=True)
-
+                        
                     with col2:
                         st.markdown(f"""
                         <div style="background:#f0f7f4;padding:15px;border-radius:6px;border-left:3px solid #2D6A4F;margin-bottom:10px;">
