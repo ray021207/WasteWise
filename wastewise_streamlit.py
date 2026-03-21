@@ -610,6 +610,44 @@ def page_sort():
                     with col3: st.metric("🎯 Confidence", f"{result['confidence']*100:.0f}%")
                     with col4: st.metric("⭐ Points", f"+{result['points']}")
 
+                    # Health impact lookup
+                    HEALTH_IMPACT = {
+                        "special": {
+                            "icon": "🏥",
+                            "title": "Human Health Risk — Handle with Care",
+                            "color": "#7f1d1d",
+                            "bg": "#fff1f2",
+                            "border": "#f87171",
+                            "message": "Improper disposal of this item leaches toxic chemicals into groundwater and soil. Communities near illegal dump sites show higher rates of respiratory disease, neurological disorders, and childhood developmental issues. Correct drop-off eliminates that risk."
+                        },
+                        "recycling": {
+                            "icon": "💚",
+                            "title": "Positive Health Impact",
+                            "color": "#14532d",
+                            "bg": "#f0fdf4",
+                            "border": "#4ade80",
+                            "message": "Recycling this item reduces industrial manufacturing demand, which cuts air pollution from factories. Studies show communities near recycling-active areas have lower rates of asthma and cardiovascular disease compared to landfill-heavy areas."
+                        },
+                        "landfill": {
+                            "icon": "⚠️",
+                            "title": "Landfill Health Concern",
+                            "color": "#7c2d12",
+                            "bg": "#fff7ed",
+                            "border": "#fb923c",
+                            "message": "Landfill decomposition produces methane and leachate that contaminate local air and water. Residents within 1 mile of landfills show elevated rates of low birth weight, preterm births, and respiratory illness. Only send here if no alternative exists."
+                        },
+                        "compost": {
+                            "icon": "🌱",
+                            "title": "Great for Community Health",
+                            "color": "#14532d",
+                            "bg": "#f0fdf4",
+                            "border": "#4ade80",
+                            "message": "Composting diverts organic waste from landfills, reducing methane — a greenhouse gas 80x more potent than CO₂ over 20 years. Compost-enriched soil grows healthier food with fewer pesticides, directly benefiting community nutrition."
+                        }
+                    }
+
+                    health = HEALTH_IMPACT.get(result.get("bin", "landfill"), HEALTH_IMPACT["landfill"])
+
                     st.markdown("---")
                     col1, col2 = st.columns(2)
                     with col1:
@@ -623,19 +661,34 @@ def page_sort():
                             <p style="color:#444;margin:0;font-size:0.95em;">{result['impact']}</p>
                         </div>
                         """, unsafe_allow_html=True)
+
                     with col2:
                         st.markdown(f"""
                         <div style="background:#f0f7f4;padding:15px;border-radius:6px;border-left:3px solid #2D6A4F;margin-bottom:10px;">
                             <h4 style="color:#1B4332;margin-top:0;">📋 How to Prepare</h4>
                             <p style="color:#444;margin:0;font-size:0.95em;">{result['prep']}</p>
                         </div>
-                        <div style="background:#f0f7f4;padding:15px;border-radius:6px;border-left:3px solid #2D6A4F;">
+                        <div style="background:#f0f7f4;padding:15px;border-radius:6px;border-left:3px solid #2D6A4F;margin-bottom:10px;">
                             <h4 style="color:#1B4332;margin-top:0;">📊 Your Savings</h4>
                             <p style="color:#444;margin:4px 0;font-size:0.9em;">🌍 CO₂: -{result['environmentalImpact']['co2']:.2f}kg</p>
                             <p style="color:#444;margin:4px 0;font-size:0.9em;">💧 Water: -{result['environmentalImpact']['water']:.1f}L</p>
                             <p style="color:#444;margin:4px 0;font-size:0.9em;">🌳 Trees: +{result['environmentalImpact']['trees']:.4f}</p>
                         </div>
                         """, unsafe_allow_html=True)
+
+                    # Health impact — full width below
+                    st.markdown(f"""
+                    <div style="background:{health['bg']};border:1px solid {health['border']};
+                                border-left:4px solid {health['border']};
+                                padding:16px 18px;border-radius:8px;margin-top:10px;">
+                        <h4 style="color:{health['color']};margin:0 0 8px;">
+                            {health['icon']} {health['title']}
+                        </h4>
+                        <p style="color:{health['color']};margin:0;font-size:0.92em;line-height:1.6;">
+                            {health['message']}
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
 
                     # Show drop-off map for special items
                     if result.get("bin") == "special":
@@ -772,14 +825,32 @@ def page_fiftyone_insights():
                      color=bin_counts.index.str.title(),
                      color_discrete_map={"Recycling":"#2D6A4F","Compost":"#52B788","Landfill":"#e74c3c","Special":"#f59e0b"},
                      labels={"x":"Bin Type","y":"Count"})
-        fig.update_layout(showlegend=False, plot_bgcolor="white", paper_bgcolor="white")
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(
+            showlegend=False,
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            font=dict(color="#1B4332", size=13),
+            xaxis=dict(tickfont=dict(color="#1B4332", size=12),
+                       title_font=dict(color="#1B4332", size=13)),
+            yaxis=dict(tickfont=dict(color="#1B4332", size=12),
+                       title_font=dict(color="#1B4332", size=13)),
+        )
+        st.plotly_chart(fig, use_container_width=True, key="fo_bar")
     with col2:
         st.subheader("Confidence Distribution")
-        fig = px.histogram(df, x="confidence", nbins=15, color_discrete_sequence=["#2D6A4F"],
-                           labels={"confidence":"Confidence Score"})
-        fig.update_layout(plot_bgcolor="white", paper_bgcolor="white")
-        st.plotly_chart(fig, use_container_width=True)
+        fig = px.histogram(df, x="confidence", nbins=15,
+                           color_discrete_sequence=["#2D6A4F"],
+                           labels={"confidence":"Confidence Score","count":"Count"})
+        fig.update_layout(
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            font=dict(color="#1B4332", size=13),
+            xaxis=dict(tickfont=dict(color="#1B4332", size=12),
+                       title_font=dict(color="#1B4332", size=13)),
+            yaxis=dict(tickfont=dict(color="#1B4332", size=12),
+                       title_font=dict(color="#1B4332", size=13)),
+        )
+        st.plotly_chart(fig, use_container_width=True, key="fo_hist")
 
     st.markdown("""
     <div style='background:#f0f7f4;border:1px solid #d4e8e0;border-left:4px solid #2D6A4F;
