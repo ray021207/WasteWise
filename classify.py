@@ -3,20 +3,19 @@ import anthropic, base64, json, os
 
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
-# Load whichever dataset exists
-dataset_name = "WasteWise_Submissions"
-if dataset_name not in fo.list_datasets():
-    print("No submissions yet — loading demo dataset instead")
-    dataset_name = "WasteWise_Demo"
+# Recreate dataset from images folder
+dataset_name = "WasteWise_Demo"
+if dataset_name in fo.list_datasets():
+    fo.delete_dataset(dataset_name)
 
-dataset = fo.load_dataset(dataset_name)
-print(f"Loaded {len(dataset)} samples from {dataset_name}")
+dataset = fo.Dataset.from_images_dir(
+    "./waste_images",
+    name=dataset_name,
+    persistent=True
+)
+print(f"✅ Loaded {len(dataset)} images")
 
-# Only classify samples that haven't been classified yet
-unclassified = dataset.match({"bin_type": {"$exists": False}})
-print(f"Unclassified: {len(unclassified)} samples")
-
-for sample in unclassified:
+for sample in dataset:
     try:
         with open(sample.filepath, "rb") as f:
             img = base64.b64encode(f.read()).decode()
@@ -25,10 +24,10 @@ for sample in unclassified:
 
         r = client.messages.create(
             model="claude-sonnet-4-6", max_tokens=200,
-            system='Respond ONLY in JSON: {"item":"name","bin":"recycling or landfill or compost or special","confidence":0.0}',
+            system='Respond ONLY in JSON no markdown: {"item":"name","bin":"recycling or landfill or compost or special","confidence":0.0}',
             messages=[{"role":"user","content":[
                 {"type":"image","source":{"type":"base64","media_type":mt,"data":img}},
-                {"type":"text","text":f"Classify this waste for {sample.get('city','Tempe AZ')}"}
+                {"type":"text","text":"Classify this waste for Tempe AZ"}
             ]}]
         )
         text = r.content[0].text.strip()
@@ -43,12 +42,8 @@ for sample in unclassified:
         print(f"✅ {result['item']} → {result['bin']} ({result['confidence']:.0%})")
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Skipped: {e}")
 
 print("\n✅ Done! Opening FiftyOne...")
 session = fo.launch_app(dataset)
 input("Press Enter to quit")
-
-
-
-
